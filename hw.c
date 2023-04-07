@@ -87,9 +87,9 @@ void init(){
     normal_menu_list = (Menu **)malloc((MAX_FIELD_LENGTH) * sizeof(Menu));
     vegan_menu_list = (Menu **)malloc((MAX_FIELD_LENGTH) * sizeof(Menu));
     vegetarian_menu_list = (Menu **)malloc((MAX_FIELD_LENGTH) * sizeof(Menu));
-    setMenu(data, normal_menu_list, "\"Vegan\"");
+    setMenu(data, normal_menu_list, "\"Normal\"");
     setMenu(data, vegan_menu_list, "\"Vegan\"");
-    setMenu(data, vegetarian_menu_list, "\"Vegan\"");
+    setMenu(data, vegetarian_menu_list, "\"Vegetarian\"");
 }
 
 int main()
