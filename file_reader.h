@@ -14,8 +14,7 @@
  *   user gets the related data by giving the first data's address.
  */
 
-void readCSV(char *filename, char** data)
-{
+void readCSV(char *filename, char** data) {
 
     FILE *fp = fopen(filename, "r");
 
@@ -33,10 +32,9 @@ void readCSV(char *filename, char** data)
         if (line != NULL)
         {
             strcpy(data[index], line);
-            index++;
-            
+            index++;            
         }
     }
-
     fclose(fp);
+
 }
