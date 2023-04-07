@@ -26,15 +26,6 @@ Menu **normal_menu_list = NULL;
 Menu **vegan_menu_list = NULL;
 Menu **vegetarian_menu_list = NULL;
 
-/*
-including three other types of struct and the name of the month for the given menu.
-Cafeteria:
-- Name of the month (initially unallocated and NULL)
-- Pointer for the normal menu array (initially unallocated and NULL)
-- Pointer for the vegan menu array (initially unallocated and NULL)
-- Pointer for the vegetarian menu array (initially unallocated and NULL)
-*/
-
 typedef struct
 {
 
@@ -49,7 +40,10 @@ Cafeteria cafeteria = {NULL, NULL, NULL, NULL};
 
 
 /*
-* not ok!
+* set data to related menu.
+* @param **data contains lines of data that occurs on csv.
+* @param **menu_list represents one of the menu list struct.
+* @param *type that defines one of the menu list with regex [\"^\"]
 */
 void setMenu(char **data, Menu **menu_list, char *type)
 {
@@ -60,40 +54,51 @@ void setMenu(char **data, Menu **menu_list, char *type)
     char date[32], soup[64], main_dish[64], side_dish[64], extra[64];
 
     int index = 0, j=0;
-    while (index != MAX_FIELD_LENGTH)
+    while (index != MAX_FIELD_LENGTH && data[index] != NULL)
     {
         sscanf(data[index], "%[^,],%[^,],%[^,],%[^,],%[^,],%[^,]", menu_type, date, soup, main_dish, side_dish,extra);
 
 
         if (strcmp(menu_type, type) == 0)
         {
-            menu_list[j] = malloc(sizeof(Menu));
-            menu_ptr = &*menu_list[j];
-            menu_ptr->date = date;
-            menu_ptr->soup = soup;
-            menu_ptr->main_dish = main_dish;
-            menu_ptr->side_dish = side_dish;
-            menu_ptr->extra = extra;         
+            menu_list[j] = (Menu*) malloc(sizeof(Menu));
+            if (menu_list[j] == NULL) {
+                // malloc failed to allocate memory, handle error
+                printf("Error: memory allocation failed\n");
+                return;
+            }
+
+            menu_list[j]->date = strdup(date);
+            menu_list[j]->soup = strdup(soup);
+            menu_list[j]->main_dish = strdup(main_dish);
+            menu_list[j]->side_dish = strdup(side_dish);
+            menu_list[j]->extra = strdup(extra);     
             j++;
         }
-
         index++;
     }
+}
+
+void init(){
+
+    char **data = (char **)malloc((MAX_FIELD_LENGTH) * sizeof(char *));
+    readCSV("cafeteria_march_menu.csv", data);
+
+    normal_menu_list = (Menu **)malloc((MAX_FIELD_LENGTH) * sizeof(Menu));
+    vegan_menu_list = (Menu **)malloc((MAX_FIELD_LENGTH) * sizeof(Menu));
+    vegetarian_menu_list = (Menu **)malloc((MAX_FIELD_LENGTH) * sizeof(Menu));
+    setMenu(data, normal_menu_list, "\"Vegan\"");
+    setMenu(data, vegan_menu_list, "\"Vegan\"");
+    setMenu(data, vegetarian_menu_list, "\"Vegan\"");
 }
 
 int main()
 {
 
     // header();
-    // systemInfo();
-
-    // initialize data array
-    char **data = (char **)malloc((MAX_FIELD_LENGTH) * sizeof(char *));
-    // read files
-    readCSV("cafeteria_march_menu.csv", data);
-    // printf("%s", data[2]);
-    vegan_menu_list = malloc(MAX_FIELD_LENGTH * sizeof(Menu));
-    setMenu(data, vegan_menu_list, "\"Vegan\"");
-
+    // systemInfo();    
+    
+    init();
+    printf("%s", vegetarian_menu_list[0]->date);
     return 0;
 }
