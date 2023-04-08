@@ -6,11 +6,11 @@
  */
 
 #include <stdio.h>
-#include <regex.h>
-#include "file_reader.h"
-#include "display.h"
+#include <stdlib.h>
+#include <string.h>
 
-#define MAX_FIELD_LENGTH 69
+#define MAX_FIELD_LENGTH 68
+#define MAX_LINE_LENGTH 1024
 #define MAX_WORD_LENGTH 64
 typedef struct
 {
@@ -22,83 +22,111 @@ typedef struct
     int sale_count_array[3]; //  An array with three elements that looks like [‘student_count’, ‘academic_count’, ‘administrative_count’].
 } Menu;
 
-Menu **normal_menu_list = NULL;
-Menu **vegan_menu_list = NULL;
-Menu **vegetarian_menu_list = NULL;
-
 typedef struct
 {
 
     char *month;
-    Menu *normal_menu;
-    Menu *vegan_menu;
-    Menu *vegetarian_menu;
+    Menu **normal_menu_array;
+    Menu **vegan_menu_array;
+    Menu **vegetarian_menu_array;
 
 } Cafeteria;
 
-Cafeteria cafeteria = {NULL, NULL, NULL, NULL};
-
-
-/*
-* set data to related menu.
-* @param **data contains lines of data that occurs on csv.
-* @param **menu_list represents one of the menu list struct.
-* @param *type that defines one of the menu list with regex [\"^\"]
-*/
-void setMenu(char **data, Menu **menu_list, char *type)
+void initialize_menus(Cafeteria *cafeteria, char *csv_file_name)
 {
+    FILE *fp = fopen(csv_file_name, "r");
 
-    Menu *menu_ptr;
-    
-    char menu_type[10];
-    char date[32], soup[64], main_dish[64], side_dish[64], extra[64];
 
-    int index = 0, j=0;
-    while (index != MAX_FIELD_LENGTH && data[index] != NULL)
+    if (fp == NULL)
     {
-        sscanf(data[index], "%[^,],%[^,],%[^,],%[^,],%[^,],%[^,]", menu_type, date, soup, main_dish, side_dish,extra);
+        printf("Error opening file.\n");
+        exit(0);
+    }
 
+    char line[MAX_LINE_LENGTH];
+    char *token;
+    int index = 0, count_normal = 0, count_vegan = 0, count_vegetarian = 0;
 
-        if (strcmp(menu_type, type) == 0)
+    while (fgets(line, MAX_LINE_LENGTH, fp) != NULL)
+    {
+        token = strtok(line, ",");
+        if (strcmp(token, "\"Normal\"") == 0)
         {
-            menu_list[j] = (Menu*) malloc(sizeof(Menu));
-            if (menu_list[j] == NULL) {
-                // malloc failed to allocate memory, handle error
-                printf("Error: memory allocation failed\n");
-                return;
-            }
-
-            menu_list[j]->date = strdup(date);
-            menu_list[j]->soup = strdup(soup);
-            menu_list[j]->main_dish = strdup(main_dish);
-            menu_list[j]->side_dish = strdup(side_dish);
-            menu_list[j]->extra = strdup(extra);     
-            j++;
+            count_normal++;
+        }
+        else if (strcmp(token, "\"Vegan\"") == 0)
+        {
+            count_vegan++;
+        }
+        else if (strcmp(token, "\"Vegetarian\"") == 0)
+        {
+            count_vegetarian++;
         }
         index++;
     }
+    rewind(fp);
+    
+    cafeteria->normal_menu_array = malloc(count_normal * sizeof(Menu));
+    cafeteria->vegan_menu_array = malloc(count_vegan * sizeof(Menu));
+    cafeteria->vegetarian_menu_array = malloc(count_vegetarian * sizeof(Menu));
+
+    char menu_type[10];
+    char date[32], soup[64], main_dish[64], side_dish[64], extra[64];
+    int j = 0, k = 0, l = 0;
+    index = 0;
+    while (fgets(line, MAX_LINE_LENGTH, fp) != NULL)
+    {
+        sscanf(line, "%[^,],%[^,],%[^,],%[^,],%[^,],%[^,]", menu_type, date, soup, main_dish, side_dish, extra);
+        if (strcmp(menu_type, "\"Normal\"") == 0)
+        {
+            cafeteria->normal_menu_array[j] = (Menu *)malloc(sizeof(Menu));
+            cafeteria->normal_menu_array[j]->date = strdup(date);
+            cafeteria->normal_menu_array[j]->soup = strdup(soup);
+            cafeteria->normal_menu_array[j]->main_dish = strdup(main_dish);
+            cafeteria->normal_menu_array[j]->side_dish = strdup(side_dish);
+            cafeteria->normal_menu_array[j]->extra = strdup(extra);
+            j++;
+        }
+        else if (strcmp(menu_type, "\"Vegan\"") == 0)
+        {
+            cafeteria->vegan_menu_array[k] = (Menu *)malloc(sizeof(Menu));
+            cafeteria->vegan_menu_array[k]->date = strdup(date);
+            cafeteria->vegan_menu_array[k]->soup = strdup(soup);
+            cafeteria->vegan_menu_array[k]->main_dish = strdup(main_dish);
+            cafeteria->vegan_menu_array[k]->side_dish = strdup(side_dish);
+            cafeteria->vegan_menu_array[k]->extra = strdup(extra);
+            k++;
+        }
+        else if (strcmp(menu_type, "\"Vegetarian\"") == 0)
+        {
+            cafeteria->vegetarian_menu_array[l] = (Menu *)malloc(sizeof(Menu));
+            cafeteria->vegetarian_menu_array[l]->date = strdup(date);
+            cafeteria->vegetarian_menu_array[l]->soup = strdup(soup);
+            cafeteria->vegetarian_menu_array[l]->main_dish = strdup(main_dish);
+            cafeteria->vegetarian_menu_array[l]->side_dish = strdup(side_dish);
+            cafeteria->vegetarian_menu_array[l]->extra = strdup(extra);
+            l++;
+        }
+
+        index++;
+    }
+    fclose(fp);
+    // setMenu(data, cafeteria->normal_menu_array, "\"Normal\"");
+    printf("%s", cafeteria->normal_menu_array[3]->date);
+    // setMenu(data, cafeteria, "\"Vegan\"");
+    // setMenu(data, cafeteria, "\"Vegetarian\"");
 }
-
-void init(){
-
-    char **data = (char **)malloc((MAX_FIELD_LENGTH) * sizeof(char *));
-    readCSV("cafeteria_march_menu.csv", data);
-
-    normal_menu_list = (Menu **)malloc((MAX_FIELD_LENGTH) * sizeof(Menu));
-    vegan_menu_list = (Menu **)malloc((MAX_FIELD_LENGTH) * sizeof(Menu));
-    vegetarian_menu_list = (Menu **)malloc((MAX_FIELD_LENGTH) * sizeof(Menu));
-    setMenu(data, normal_menu_list, "\"Normal\"");
-    setMenu(data, vegan_menu_list, "\"Vegan\"");
-    setMenu(data, vegetarian_menu_list, "\"Vegetarian\"");
+void record_customer_counts(Cafeteria *cafeteria)
+{
+}
+void calc_and_show_income(Cafeteria *cafeteria)
+{
 }
 
 int main()
 {
 
-    // header();
-    // systemInfo();    
-    
-    init();
-    printf("%s", vegetarian_menu_list[0]->date);
+    Cafeteria cafeteria = {NULL, NULL, NULL, NULL};
+    initialize_menus(&cafeteria, "cafeteria_march_menu.csv");
     return 0;
 }
