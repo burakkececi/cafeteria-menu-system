@@ -312,6 +312,31 @@ void calc_and_show_income(Cafeteria *cafeteria)
     printf("Total Sales: %d\n", subtotal);
 }
 
+void free_allocations(Cafeteria *cafeteria) {
+
+    int j=0, k=0, l=0;
+    while (cafeteria->normal_menu_array[j] != NULL)
+    {
+        free(cafeteria->normal_menu_array[j]);
+        j++;
+    }
+    while (cafeteria->vegan_menu_array[k] != NULL)
+    {
+        free(cafeteria->vegan_menu_array[k]);
+        k++;
+    }
+    while (cafeteria->vegetarian_menu_array[l] != NULL)
+    {
+        free(cafeteria->vegetarian_menu_array[l]);
+        l++;
+    }
+
+    free(cafeteria->normal_menu_array);
+    free(cafeteria->vegan_menu_array);
+    free(cafeteria->vegetarian_menu_array);
+
+}
+
 int main()
 {
 
@@ -319,6 +344,7 @@ int main()
     initialize_menus(&cafeteria, "cafeteria_march_menu.csv");
     record_customer_counts(&cafeteria);
     calc_and_show_income(&cafeteria);
+    free_allocations(&cafeteria);
 
     return 0;
 }
